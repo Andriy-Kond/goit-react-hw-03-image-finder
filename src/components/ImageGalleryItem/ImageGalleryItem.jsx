@@ -1,8 +1,19 @@
 // Компонент елемента списку із зображенням. Створює DOM-елемент наступної структури.
-export const ImageGalleryItem = ({ toggleModal }) => {
+import '../styles.css';
+
+export const ImageGalleryItem = ({
+  toggleModal,
+  webformatURL,
+  largeImageURL,
+}) => {
   return (
-    <li className="ImageGalleryItem" onClick={toggleModal}>
-      <img src="http" alt="small img" />
+    <li className="ImageGalleryItem" onClick={() => toggleModal(largeImageURL)}>
+      <img
+        className="ImageGalleryItem-image "
+        src={webformatURL}
+        alt="small img"
+        width="300"
+      />
     </li>
   );
 };

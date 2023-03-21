@@ -1,19 +1,21 @@
 // Компонент спінера відображається, доки відбувається завантаження зображень.
 import { RotatingSquare } from 'react-loader-spinner';
+import '../styles.css';
 
 export const Loader = () => {
-  return;
   // No css import is required
-  // <RotatingSquare
-  //   height="100"
-  //   width="100"
-  //   color="#e68b14"
-  //   ariaLabel="rotating-square-loading"
-  //   strokeWidth="4"
-  //   wrapperStyle={{}}
-  //   wrapperClass=""
-  //   visible={true}
-  // />
+  return (
+    <RotatingSquare
+      height="100"
+      width="100"
+      color="#e68b14"
+      ariaLabel="rotating-square-loading"
+      strokeWidth="4"
+      wrapperStyle={{}}
+      wrapperClass=""
+      visible={true}
+    />
+  );
 };
 
 // Спінери

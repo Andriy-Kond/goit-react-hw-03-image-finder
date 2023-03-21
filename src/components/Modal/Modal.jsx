@@ -10,10 +10,18 @@ import '../styles.css';
 const modalRoot = document.querySelector('#modal-root');
 
 export class Modal extends Component {
+  state = {
+    largeImageURL: '',
+  };
+
   componentDidMount() {
     // Закриття модалки по ESC
     window.addEventListener('keydown', this.presEsc);
   }
+
+  getLargeImageURL = largeImageURL => {
+    this.setState({ largeImageURL: largeImageURL });
+  };
 
   componentWillUnmount() {
     window.removeEventListener('keydown', this.presEsc);
@@ -35,13 +43,11 @@ export class Modal extends Component {
     return createPortal(
       <div className="Overlay" onClick={this.backdropClick}>
         <div className="Modal">{this.props.children}</div>
-        {/* <img src="http" alt="велике зображення" />  - переніс у children*/}
+
+        {/* <img src={this.props.largeImageURL} alt="велике зображення" /> */}
+        {/* <img src="http" alt="велике зображення" />  - переніс у children */}
       </div>,
       modalRoot
     );
   }
 }
-
-// (
-
-// );
