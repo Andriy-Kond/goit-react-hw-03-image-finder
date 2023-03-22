@@ -47,8 +47,9 @@ export class ImageGallery extends Component {
       // Отримую дані від серверу (масив об'єктів)
       .then(({ totalHits, hits }) => {
         // Якщо нічого не знайдено, то виходжу
-        if (hits.length === 0)
-          toast.info(`Відсутні зображення за запитом "${request}"`);
+        if (hits.length === 0) {
+          return toast.info(`Відсутні зображення за запитом "${request}"`);
+        }
 
         // показую повідомлення про кількість зображень лише при першому запиті
         if (page === 1)
