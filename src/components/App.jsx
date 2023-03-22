@@ -24,6 +24,7 @@ export class App extends Component {
     showModal: false, // Відкриття/закриття модалки.
     request: '',
     largeImageURL: '',
+    tagOfBigImg: '',
   };
 
   // Отримання даних запросу з форми
@@ -42,9 +43,9 @@ export class App extends Component {
   // };
 
   // Звичайний запис:
-  toggleModal = ImageURL => {
+  toggleModal = (ImageURL, tag) => {
     this.setState({ showModal: !this.state.showModal });
-    ImageURL && this.setState({ largeImageURL: ImageURL });
+    ImageURL && this.setState({ largeImageURL: ImageURL, tagOfBigImg: tag });
   };
 
   // Оновлення
@@ -79,7 +80,10 @@ export class App extends Component {
               ipsam perferendis atque animi consequatur pariatur explicabo non
               dicta. Debitis velit numquam distinctio perspiciatis!
             </p> */}
-            <img src={this.state.largeImageURL} alt="велике зображення" />
+            <img
+              src={this.state.largeImageURL}
+              alt={`big img of ${this.state.tagOfBigImg}`}
+            />
             {/* <button type="button" onClick={this.toggleModal}>
               Close
             </button> */}
