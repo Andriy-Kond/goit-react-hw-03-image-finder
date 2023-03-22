@@ -1,9 +1,6 @@
-// Компонент приймає один проп onSubmit – функцію для передачі значення інпута під час сабміту форми. Створює DOM-елемент наступної структури.
 import { Component } from 'react';
 import { toast } from 'react-toastify'; // повідомлення по типу Notify
 import { FiSearch } from 'react-icons/fi'; // іконки React-Icons
-
-// import '../styles.css';
 
 export class Searchbar extends Component {
   state = {
@@ -16,15 +13,14 @@ export class Searchbar extends Component {
 
   handleRequestSubmit = e => {
     e.preventDefault();
+    const { requestValue } = this.state;
 
-    if (this.state.requestValue.trim() === '') {
-      // alert('введіть щось для пошуку');
-      // замість алерту - react-toastify:
-      toast.error('введіть щось для пошуку');
+    if (requestValue.trim() === '') {
+      toast.error('Введіть хоч щось...');
       return;
     }
-    this.props.onSubmit(this.state.requestValue.trim());
 
+    this.props.onSubmit(requestValue.trim());
     this.setState({ requestValue: '' });
   };
 
@@ -33,6 +29,7 @@ export class Searchbar extends Component {
       <header className="Searchbar">
         <form className="SearchForm" onSubmit={this.handleRequestSubmit}>
           <button type="submit" className="SearchForm-button">
+            {/* Іконка пошуку: */}
             <FiSearch className="SearchForm-button-icon" />
             <span className="SearchForm-button-label">Search</span>
           </button>

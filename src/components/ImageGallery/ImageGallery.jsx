@@ -1,29 +1,25 @@
-// Список карток зображень.Створює DOM - елемент наступної структури.
 import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 import { Component } from 'react';
-import { nanoid } from 'nanoid';
-import { toast } from 'react-toastify';
-import '../styles.css';
-import { Loader } from 'components/Loader/Loader';
-import { Button } from 'components/Button/Button';
-import { FaBeer } from 'react-icons/fa';
+import { nanoid } from 'nanoid'; // генерація ID
+import { toast } from 'react-toastify'; // повідомлення
+import { Loader } from 'components/Loader/Loader'; // спінер
+import { Button } from 'components/Button/Button'; // кнопка Load More
 
 export class ImageGallery extends Component {
   state = {
     data: [],
-    hits: [], // ^ Спроба оновлювати не всі картки, а додавати нові до старих без оновлення всієї data.
     error: null,
     status: '',
     page: 1,
-    isShownBtn: false,
-    isLoading: false, // показ спінера і деактивація кнопки Load More
+    isShownBtn: false, // показ кнопки Load More
+    isDisabledBtn: false, // деактивація кнопки Load More
+    isLoading: false, // показ спінеру
   };
 
   // * Функція запиту
   getFetch = () => {
-    const { request } = this.props;
     const { page } = this.state;
-
+    const { request } = this.props;
     const URL_CONST = 'https://pixabay.com/api/';
     // Клас URLSearchParams:
     const searchParams = new URLSearchParams({
@@ -35,49 +31,54 @@ export class ImageGallery extends Component {
       page: page, // сторінка у state (змінюється кнопкою Load More, або скидається новим запитом)
     });
 
-    this.setState({ isLoading: true }); // показую спінер і деактивую кнопку Load More
+    this.setState({ isLoading: true, isDisabledBtn: true }); // показую спінер і деактивую кнопку Load More
     fetch(`${URL_CONST}?${searchParams}`)
       .then(res => {
-        // Якщо API відповіло з помилкою 404, то ми відловлюємо її тут
+        // Якщо API відповіло з помилкою 4XX, то відловлюємо її тут
         if (res.ok) {
           return res.json();
         }
-        // Якщо відповідь 404 від сервера, то робимо новий об'єкт помилки з необхідним повідомленням:
+        // Якщо відповідь від сервера - 4XX, то роблю новий об'єкт помилки з необхідним повідомленням:
         return Promise.reject(
           new Error(`Якась помилка на сервері, спробуйте пізніше`)
         );
       })
-      // Отримуємо масив об'єктів (дані)
+
+      // Отримую дані від серверу (масив об'єктів)
       .then(({ totalHits, hits }) => {
-        // console.log('hits.length:', hits.length);
-        // console.log('totalHits:', totalHits);
-        // console.log("page", page);
-
         // Якщо нічого не знайдено, то виходжу
-        if (hits.length === 0) {
-          return toast.info(`Відсутні зображення за запитом "${request}"`);
-          // throw new Error(`Відсутні зображення за запитом "${request}"`);
-        }
+        if (hits.length === 0)
+          toast.info(`Відсутні зображення за запитом "${request}"`);
 
-        // Ховаю кнопку Load More, якщо кількість нових об'єктів менше ніж per_page (тобто вони закінчились на сервері)
-        if (hits.length < searchParams.get('per_page')) {
-          this.setState({ isShownBtn: false });
-        }
+        // показую повідомлення про кількість зображень лише при першому запиті
+        if (page === 1)
+          toast.success(
+            `Знайдено ${totalHits} результат(ів) по запиту "${request}"`
+          );
 
         // Оновлюю стейт
         this.setState(prevState => {
           return {
             data: [...prevState.data, ...hits], // старі дані + нові
-            hits: [...hits], // дані в цьому запиту (макс 12 об'єктів)
-            // status: 'resolved',
             isShownBtn: true, // показую кнопку Load More
+            isDisabledBtn: false, // активую кнопку Load More
+            // status: 'resolved', // вже зайве
           };
         });
+
+        // Ховаю або Деактивую кнопку Load More, якщо кількість нових об'єктів менше ніж per_page (тобто вони закінчились на сервері)
+        if (hits.length < searchParams.get('per_page')) {
+          // this.setState({ isShownBtn: false }); // якщо треба ховати
+          this.setState({ isDisabledBtn: true });
+          toast.info(
+            `Це все. Більше по запиту "${request}" зображень в нас нема`
+          );
+        }
       })
-      // Записуємо у stat або нашу помилку (якщо !res.ok), або будь-яку іншу:
+      // Записую у state або створену помилку (якщо !res.ok), або будь-яку іншу:
       .catch(error => this.setState({ error, status: 'rejected' }))
       .finally(() => {
-        // ховаю спінер (і активую кнопку Load More)
+        // ховаю спінер
         this.setState({ isLoading: false });
       });
   };
@@ -89,22 +90,17 @@ export class ImageGallery extends Component {
     });
   };
 
-  // // Монтування
-  // componentDidMount() {
-  //   // console.log('imageGallery componentDidMount');
-  // }
-
   componentDidUpdate(prevProps, prevState) {
     const { request } = this.props;
     const { page } = this.state;
 
-    // Якщо запит змінився, то скидаємо state і робимо запит:
+    // Якщо запит змінився, то скидаю state і роблю запит:
     if (prevProps.request !== request) {
       this.setState({ data: [], page: 1, isShownBtn: false });
       this.getFetch();
     }
 
-    // Якщо запит не змінився, а сторінка змінилась (була натиснута кнопка Load More), то робимо запит
+    // Якщо запит не змінився, а сторінка змінилась (була натиснута кнопка Load More), то роблю запит
     else {
       if (page !== prevState.page) {
         this.getFetch();
@@ -113,40 +109,38 @@ export class ImageGallery extends Component {
   }
 
   render() {
-    const { status, error, data, isShownBtn, hits, isLoading } = this.state;
-    const { request, toggleModal } = this.props;
+    const { status, error, data, isShownBtn, isLoading, isDisabledBtn } =
+      this.state;
 
+    //  Якщо є помилка (не 404 від сервера, а будь-яка інша):
     if (status === 'rejected') {
-      //  Якщо є помилка (не 404 від сервера, а будь-яка інша):
-      //  {this.state.error && <h1>Помилка!</h1>}
       return <h1>{`Помилка: ${error.message}`}</h1>;
     }
 
     // if (status === 'resolved') {
-    // прибрав 'resolved' щоби loader показувався внизу під картками зображень. Якщо робити ще один статус ("pending"), то всі картки будуть зникати, а спінер буде показуватись зверху на сторінці без карток.
-    // Якщо є масив об'єктів по запиту:
+    // прибрав 'resolved' щоби loader показувався внизу під вже завантаженими картками зображень.
     return (
       <>
         <ul className="ImageGallery">
-          {data.map(
-            ({ id, webformatURL, largeImageURL, tags }, index, array) => {
-              return (
-                <ImageGalleryItem
-                  key={nanoid()}
-                  id={id}
-                  webformatURL={webformatURL}
-                  largeImageURL={largeImageURL}
-                  toggleModal={toggleModal}
-                  tags={tags}
-                />
-              );
-            }
-          )}
+          {data.map(({ id, webformatURL, largeImageURL, tags }) => {
+            return (
+              <ImageGalleryItem
+                key={nanoid()}
+                id={id}
+                webformatURL={webformatURL}
+                largeImageURL={largeImageURL}
+                tags={tags}
+              />
+            );
+          })}
         </ul>
 
         {isLoading && <Loader />}
         {isShownBtn && (
-          <Button loadMoreBtn={this.loadMoreBtnClick} isLoading={isLoading} />
+          <Button
+            loadMoreBtn={this.loadMoreBtnClick}
+            isDisabledBtn={isDisabledBtn}
+          />
         )}
       </>
     );

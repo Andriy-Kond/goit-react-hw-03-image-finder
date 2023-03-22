@@ -1,9 +1,6 @@
-// При натисканні на кнопку Load more повинна довантажуватись наступна порція зображень і рендеритися разом із попередніми. Кнопка повинна рендеритися лише тоді, коли є якісь завантажені зображення. Якщо масив зображень порожній, кнопка не рендериться.
-import '../styles.css';
-
-export const Button = ({ loadMoreBtn, isLoading }) => {
+export const Button = ({ loadMoreBtn, isDisabledBtn }) => {
   return (
-    <button className="Button" onClick={loadMoreBtn} disabled={isLoading}>
+    <button className="Button" onClick={loadMoreBtn} disabled={isDisabledBtn}>
       Load More
     </button>
   );
