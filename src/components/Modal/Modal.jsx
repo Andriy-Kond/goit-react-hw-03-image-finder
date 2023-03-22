@@ -15,37 +15,35 @@ export class Modal extends Component {
   };
 
   componentDidMount() {
-    // Закриття модалки по ESC
+    // Для закриття модалки по ESC
     window.addEventListener('keydown', this.presEsc);
   }
-
-  getLargeImageURL = largeImageURL => {
-    this.setState({ largeImageURL: largeImageURL });
-  };
-
   componentWillUnmount() {
     window.removeEventListener('keydown', this.presEsc);
   }
 
+  // Закриття модалки по ESC
   presEsc = e => {
     if (e.code === 'Escape') {
       this.props.onClose();
     }
   };
-
+  // Закриття модалки по кліку на бекдропі
   backdropClick = e => {
     if (e.target === e.currentTarget) {
       this.props.onClose();
     }
   };
 
+  getLargeImageURL = largeImageURL => {
+    this.setState({ largeImageURL: largeImageURL });
+  };
+
   render() {
     return createPortal(
       <div className="Overlay" onClick={this.backdropClick}>
         <div className="Modal">{this.props.children}</div>
-
-        {/* <img src={this.props.largeImageURL} alt="велике зображення" /> */}
-        {/* <img src="http" alt="велике зображення" />  - переніс у children */}
+        {/* <img src="http" alt="велике зображення" />  - переніс у this.props.children */}
       </div>,
       modalRoot
     );

@@ -1,6 +1,12 @@
 // бібліотека реакт по іконкам
-// кнопка LoadMore
-// розмір зображення у модалці
+// кнопка LoadMore, скидання параметра page=1
+// Приривання http запиту (abort controller 1:54)
+// developer.mozilla.org/ru/docs/Web/API/AbortController
+// var controller = new AbortController(); робимо це
+// var signal = controller.signal; у нього є така властивість
+// ... fetch(url, {signal}).then(function(response) { ... у фетчі передаємо цю властивість.
+//  controller.abort(); - пририває http запит
+
 import { Component } from 'react';
 import './styles.css';
 import { ToastContainer } from 'react-toastify';
@@ -16,21 +22,15 @@ import { Modal } from './Modal/Modal';
 export class App extends Component {
   state = {
     showModal: false, // Відкриття/закриття модалки.
-    loading: false, // Показ/Хованя спінера завантаження
-    request: '0',
+    request: '',
     largeImageURL: '',
   };
 
-  // не використовуюється:
-  // getLargeImageURL = largeImageURL => {
-  //   this.setState({ largeImageURL: largeImageURL });
-  // };
-
   // Отримання даних запросу з форми
-  getRequest = requestValue => {
+  onSubmit = requestValue => {
     this.setState({ request: requestValue });
-
     // такий саме запис, якщо однакова назва змінної:
+
     // this.setState({ requestValue });
   };
 
@@ -40,42 +40,12 @@ export class App extends Component {
   // this.setState(({ showModal }) => ({ showModal: !showModal }));
   // largeImageURL && this.setState({ largeImageURL: largeImageURL });
   // };
+
   // Звичайний запис:
   toggleModal = ImageURL => {
     this.setState({ showModal: !this.state.showModal });
     ImageURL && this.setState({ largeImageURL: ImageURL });
   };
-
-  toggleLoader = state => {
-    this.setState({ loading: state }); // показую спінер
-  };
-
-  // Монтування
-  componentDidMount() {
-    // ^ обробка запиту:
-    // const URL_CONST = 'https://pixabay.com/api/?';
-    // // Клас URLSearchParams:
-    // const searchParams = new URLSearchParams({
-    //   key: '34581261-d39fcdfb48adfd850ac44b9c1',
-    //   q: 'cat',
-    //   image_type: 'photo',
-    //   orientation: 'horizontal',
-    //   per_page: 3,
-    //   page: 1,
-    // });
-    // // Запит:
-    // this.setState({ loading: true }); // показую спінер
-    // fetch(`https://pixabay.com/api/?${searchParams}`)
-    //   .then(res => res.json())
-    //   .then(({ totalHits, hits }) => {
-    //     hits.map(({ id, webformatURL, largeImageURL }, index, array) => {
-    //       console.log(totalHits, id, webformatURL, largeImageURL);
-    //     });
-    //   })
-    //   .finally(() => {
-    //     this.setState({ loading: false }); // прибираю спінер
-    //   });
-  }
 
   // Оновлення
   componentDidUpdate(prevProps, prevState) {}
@@ -86,7 +56,7 @@ export class App extends Component {
     return (
       <>
         {/* Форма пошуку: */}
-        <Searchbar getRequest={this.getRequest} />
+        <Searchbar onSubmit={this.onSubmit} />
 
         {/* Галерея зображень */}
         <ImageGallery
@@ -96,11 +66,8 @@ export class App extends Component {
           getLargeImageURL={this.getLargeImageURL}
         ></ImageGallery>
 
-        {/* Спінер */}
-        {this.state.loading && <Loader />}
-
         {/* Кнопка Load More */}
-        <Button />
+        {/* <Button /> */}
 
         {/* Модалка (велике зображення) */}
         {showModal && (
@@ -125,6 +92,33 @@ export class App extends Component {
     );
   }
 }
+
+// ^ Монтування
+// componentDidMount() {
+// ~ обробка запиту:
+// const URL_CONST = 'https://pixabay.com/api/?';
+// // Клас URLSearchParams:
+// const searchParams = new URLSearchParams({
+//   key: '34581261-d39fcdfb48adfd850ac44b9c1',
+//   q: 'cat',
+//   image_type: 'photo',
+//   orientation: 'horizontal',
+//   per_page: 3,
+//   page: 1,
+// });
+// // Запит:
+// this.setState({ loading: true }); // показую спінер
+// fetch(`https://pixabay.com/api/?${searchParams}`)
+//   .then(res => res.json())
+//   .then(({ totalHits, hits }) => {
+//     hits.map(({ id, webformatURL, largeImageURL }, index, array) => {
+//       console.log(totalHits, id, webformatURL, largeImageURL);
+//     });
+//   })
+//   .finally(() => {
+//     this.setState({ loading: false }); // прибираю спінер
+//   });
+// }
 
 // ^ URL-рядок HTTP-запиту.
 // https://pixabay.com/api/?q=cat&page=1&key=your_key&image_type=photo&orientation=horizontal&per_page=12

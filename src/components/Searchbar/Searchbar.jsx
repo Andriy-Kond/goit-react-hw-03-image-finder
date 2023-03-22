@@ -22,7 +22,7 @@ export class Searchbar extends Component {
       toast.error('введіть щось для пошуку');
       return;
     }
-    this.props.getRequest(this.state.requestValue.trim());
+    this.props.onSubmit(this.state.requestValue.trim());
 
     this.setState({ requestValue: '' });
   };
