@@ -9,6 +9,7 @@ export class Modal extends Component {
     // Для закриття модалки по ESC:
     window.addEventListener('keydown', this.presEsc);
   }
+
   componentWillUnmount() {
     window.removeEventListener('keydown', this.presEsc);
   }

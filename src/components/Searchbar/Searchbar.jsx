@@ -30,7 +30,7 @@ export class Searchbar extends Component {
       <header className="Searchbar">
         <form className="SearchForm" onSubmit={this.handleRequestSubmit}>
           <button type="submit" className="SearchForm-button">
-            {/* Іконка пошуку: */}
+            {/* Іконка пошуку із react-icons: */}
             <FiSearch className="SearchForm-button-icon" />
             <span className="SearchForm-button-label">Search</span>
           </button>

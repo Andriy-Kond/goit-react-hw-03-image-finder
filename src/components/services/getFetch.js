@@ -1,6 +1,4 @@
 export const getFetch = (request, currentPage, perPage) => {
-  // console.log('getFetch >> currentPage:', currentPage);
-
   const URL_CONST = 'https://pixabay.com/api/';
   // Клас URLSearchParams:
   const searchParams = new URLSearchParams({

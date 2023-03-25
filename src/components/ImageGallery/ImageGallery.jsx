@@ -1,6 +1,5 @@
 import { ImageGalleryItem } from 'components/ImageGalleryItem/ImageGalleryItem';
 import { Component } from 'react';
-import { nanoid } from 'nanoid'; // генерація ID
 import { toast } from 'react-toastify'; // повідомлення
 import { Loader } from 'components/Loader/Loader'; // спінер
 import { Button } from 'components/Button/Button'; // кнопка Load More
@@ -10,7 +9,6 @@ import { getFetch } from 'components/services/getFetch';
 export class ImageGallery extends Component {
   state = {
     data: [],
-    // hits: [],
     error: null,
     status: '',
     page: 1,
@@ -26,7 +24,6 @@ export class ImageGallery extends Component {
 
     // Якщо запит змінився, то скидаю state і роблю запит:
     if (prevProps.request !== request) {
-      // console.log('prevProps.request !== request');
       this.setState({ data: [], page: 1, isShownBtn: false });
       this.getQuery(1);
     }
@@ -42,10 +39,8 @@ export class ImageGallery extends Component {
   // * Функція запиту
   getQuery = currentPage => {
     const { perPage } = this.state;
-    // console.log('getQuery >> page:', page);
     const { request } = this.props;
 
-    // console.log('сторінка на початку getFetch', currentPage);
     this.setState({
       // isDisabledBtn: true, //  деактивую кнопку Load More, щоби не було випадкового кліку
       isShownBtn: false, //  ховаю кнопку Load More
@@ -70,7 +65,6 @@ export class ImageGallery extends Component {
         this.setState(prevState => {
           return {
             data: [...prevState.data, ...hits], // старі дані + нові
-            // hits: [...hits],
             isShownBtn: true, // показую кнопку Load More
             isDisabledBtn: false, // активую кнопку Load More
             // status: 'resolved', // вже зайве
