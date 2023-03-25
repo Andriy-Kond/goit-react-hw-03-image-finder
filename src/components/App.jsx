@@ -19,14 +19,7 @@ export class App extends Component {
   render() {
     return (
       <>
-        {/* Форма пошуку: */}
-        <Searchbar onSubmit={this.onSubmit} />
 
-        {/* Галерея зображень */}
-        <ImageGallery request={this.state.request}></ImageGallery>
-
-        {/* Контейнер для повідомлень: */}
-        <ToastContainer newestOnTop={true} autoClose={4000} />
       </>
     );
   }
