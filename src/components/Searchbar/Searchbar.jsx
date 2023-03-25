@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import { toast } from 'react-toastify'; // повідомлення по типу Notify
 import { FiSearch } from 'react-icons/fi'; // іконки React-Icons
+import PropTypes from 'prop-types';
 
 export class Searchbar extends Component {
   state = {
@@ -49,3 +50,7 @@ export class Searchbar extends Component {
     );
   }
 }
+
+Searchbar.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+};

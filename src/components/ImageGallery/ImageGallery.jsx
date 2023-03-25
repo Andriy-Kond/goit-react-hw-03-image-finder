@@ -4,55 +4,64 @@ import { nanoid } from 'nanoid'; // генерація ID
 import { toast } from 'react-toastify'; // повідомлення
 import { Loader } from 'components/Loader/Loader'; // спінер
 import { Button } from 'components/Button/Button'; // кнопка Load More
+import PropTypes from 'prop-types';
+import { getFetch } from 'components/services/getFetch';
 
 export class ImageGallery extends Component {
   state = {
     data: [],
+    // hits: [],
     error: null,
     status: '',
     page: 1,
-    isShownBtn: false, // показ кнопки Load More
-    isDisabledBtn: false, // деактивація кнопки Load More
-    isLoading: false, // показ спінеру
+    isShownBtn: false, // схована кнопка Load More
+    isDisabledBtn: true, // деактивована кнопка Load More
+    isLoading: false, // схований спінер
+    perPage: 12,
   };
 
-  // * Функція запиту
-  getFetch = () => {
-    const { page } = this.state;
+  componentDidUpdate(prevProps, prevState) {
     const { request } = this.props;
-    const URL_CONST = 'https://pixabay.com/api/';
-    // Клас URLSearchParams:
-    const searchParams = new URLSearchParams({
-      key: '34581261-d39fcdfb48adfd850ac44b9c1',
-      q: request, // запит
-      image_type: 'photo',
-      orientation: 'horizontal',
-      per_page: 12, // сторінок за один запит
-      page: page, // сторінка у state (змінюється кнопкою Load More, або скидається новим запитом)
+    const { page } = this.state;
+
+    // Якщо запит змінився, то скидаю state і роблю запит:
+    if (prevProps.request !== request) {
+      // console.log('prevProps.request !== request');
+      this.setState({ data: [], page: 1, isShownBtn: false });
+      this.getQuery(1);
+    }
+
+    // Якщо запит не змінився, а сторінка змінилась (була натиснута кнопка Load More), то роблю запит
+    else {
+      if (page !== prevState.page && page !== 1) {
+        this.getQuery(page);
+      }
+    }
+  }
+
+  // * Функція запиту
+  getQuery = currentPage => {
+    const { perPage } = this.state;
+    // console.log('getQuery >> page:', page);
+    const { request } = this.props;
+
+    // console.log('сторінка на початку getFetch', currentPage);
+    this.setState({
+      // isDisabledBtn: true, //  деактивую кнопку Load More, щоби не було випадкового кліку
+      isShownBtn: false, //  ховаю кнопку Load More
+      isLoading: true, // показую спінер
     });
 
-    this.setState({ isLoading: true, isDisabledBtn: true }); // показую спінер і деактивую кнопку Load More
-    fetch(`${URL_CONST}?${searchParams}`)
-      .then(res => {
-        // Якщо API відповіло з помилкою 4XX, то відловлюємо її тут
-        if (res.ok) {
-          return res.json();
-        }
-        // Якщо відповідь від сервера - 4XX, то роблю новий об'єкт помилки з необхідним повідомленням:
-        return Promise.reject(
-          new Error(`Якась помилка на сервері, спробуйте пізніше`)
-        );
-      })
-
+    getFetch(request, currentPage, perPage)
       // Отримую дані від серверу (масив об'єктів)
       .then(({ totalHits, hits }) => {
         // Якщо нічого не знайдено, то виходжу
-        if (hits.length === 0) {
+        if (totalHits === 0) {
           return toast.info(`Відсутні зображення за запитом "${request}"`);
         }
 
         // показую повідомлення про кількість зображень лише при першому запиті
-        if (page === 1)
+        if (currentPage === 1)
           toast.success(
             `Знайдено ${totalHits} результат(ів) по запиту "${request}"`
           );
@@ -61,16 +70,17 @@ export class ImageGallery extends Component {
         this.setState(prevState => {
           return {
             data: [...prevState.data, ...hits], // старі дані + нові
+            // hits: [...hits],
             isShownBtn: true, // показую кнопку Load More
             isDisabledBtn: false, // активую кнопку Load More
             // status: 'resolved', // вже зайве
           };
         });
 
-        // Ховаю або Деактивую кнопку Load More, якщо кількість нових об'єктів менше ніж per_page (тобто вони закінчились на сервері)
-        if (hits.length < searchParams.get('per_page')) {
+        // Ховаю / Деактивую кнопку Load More, якщо кількість нових об'єктів менше ніж per_page (тобто вони закінчились на сервері)
+        if (hits.length < perPage) {
           // this.setState({ isShownBtn: false }); // якщо треба ховати
-          this.setState({ isDisabledBtn: true });
+          this.setState({ isDisabledBtn: true }); // якщо треба деактивувати
           toast.info(
             `Це все. Більше по запиту "${request}" зображень в нас нема`
           );
@@ -91,24 +101,6 @@ export class ImageGallery extends Component {
     });
   };
 
-  componentDidUpdate(prevProps, prevState) {
-    const { request } = this.props;
-    const { page } = this.state;
-
-    // Якщо запит змінився, то скидаю state і роблю запит:
-    if (prevProps.request !== request) {
-      this.setState({ data: [], page: 1, isShownBtn: false });
-      this.getFetch();
-    }
-
-    // Якщо запит не змінився, а сторінка змінилась (була натиснута кнопка Load More), то роблю запит
-    else {
-      if (page !== prevState.page) {
-        this.getFetch();
-      }
-    }
-  }
-
   render() {
     const { status, error, data, isShownBtn, isLoading, isDisabledBtn } =
       this.state;
@@ -122,20 +114,20 @@ export class ImageGallery extends Component {
     // прибрав 'resolved' щоби loader показувався внизу під вже завантаженими картками зображень.
     return (
       <>
-        <ul className="ImageGallery">
-          {data.map(({ id, webformatURL, largeImageURL, tags }) => {
-            return (
-              <ImageGalleryItem
-                key={nanoid()}
-                id={id}
-                webformatURL={webformatURL}
-                largeImageURL={largeImageURL}
-                tags={tags}
-              />
-            );
-          })}
-        </ul>
-
+        {data.length !== 0 && ( // щоби не показувати ul коли немає даних
+          <ul className="ImageGallery">
+            {data.map(({ id, webformatURL, largeImageURL, tags }) => {
+              return (
+                <ImageGalleryItem
+                  key={id}
+                  webformatURL={webformatURL}
+                  largeImageURL={largeImageURL}
+                  tags={tags}
+                />
+              );
+            })}
+          </ul>
+        )}
         {isLoading && <Loader />}
         {isShownBtn && (
           <Button
@@ -148,3 +140,7 @@ export class ImageGallery extends Component {
     // }
   }
 }
+
+ImageGallery.propTypes = {
+  request: PropTypes.string.isRequired,
+};
